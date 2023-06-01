@@ -3,28 +3,10 @@
 <head>
     <title>Hash Checker</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-        }
-        form {
-            margin-bottom: 20px;
-        }
-        textarea {
-            width: 100%;
-            height: 200px;
-        }
-        input[type="submit"] {
-            background-color: #4CAF50; /* Green */
-            border: none;
-            color: white;
-            padding: 15px 32px;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 16px;
-            margin: 4px 2px;
-            cursor: pointer;
-        }
+        body {font-family: Arial, sans-serif;}
+        form {margin: 20px 0;}
+        textarea {width: 100%; height: 150px;}
+        a {display: block;}
     </style>
 </head>
 <body>
@@ -35,7 +17,7 @@
     </form>
     <h2>Previous Results:</h2>
     {% for file in files %}
-    <a href="{{ url_for('uploaded_file', filename=file) }}">{{ file }}</a><br>
+    <a href="{{ url_for('uploaded_file', filename=file) }}">{{ file }}</a>
     {% endfor %}
 </body>
 </html>
