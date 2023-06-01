@@ -1,37 +1,43 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, request, render_template, send_from_directory
 import requests
+import os
+import json
 from datetime import datetime
 
 app = Flask(__name__)
+API_KEY = 'your_virustotal_public_api_key'
+BASE_URL = 'https://www.virustotal.com/vtapi/v2/file/report'
+UPLOAD_DIR = 'uploads'
+
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+def check_hash(hash_value):
+    params = {'apikey': API_KEY, 'resource': hash_value}
+    response = requests.get(BASE_URL, params=params)
+    return response.json()
 
 @app.route('/', methods=['GET', 'POST'])
-def home():
+def index():
     if request.method == 'POST':
-        hash_list = request.form['hashes'].split('\n')
-        return redirect(f'/check?hashes={",".join(hash_list)}')
-    return render_template('home.html')
-
-@app.route('/check')
-def hash_check():
-    hash_list = request.args.get('hashes').split(',')
-    results = {}
-
-    for hash in hash_list:
-        response = requests.get(f'https://www.virustotal.com/vtapi/v2/file/report?apikey=<IHR API SCHLÜSSEL>&resource={hash}')
-        results[hash] = response.json()
-
-    date_string = datetime.now().strftime("%Y_%m_%d-%I_%M_%S_%p")
-    filename = f'results_{date_string}.txt'
-
-    with open(filename, 'w') as file:
-        for hash, result in results.items():
-            file.write(f'Hash: {hash}\n')
-            if result['positives'] > 0:
-                file.write('Bösartig: Ja\n\n')
+        hashes = request.form['hashes'].splitlines()
+        results = []
+        for hash_value in hashes:
+            result = check_hash(hash_value)
+            if result['response_code']:
+                results.append((hash_value, result['positives'], result['total']))
             else:
-                file.write('Bösartig: Nein\n\n')
+                results.append((hash_value, 'Not found', 'Not found'))
+        timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+        filename = f'{timestamp}.json'
+        with open(os.path.join(UPLOAD_DIR, filename), 'w') as f:
+            json.dump(results, f)
+        return render_template('result.html', filename=filename, results=results)
+    files = os.listdir(UPLOAD_DIR)
+    return render_template('index.html', files=files)
 
-    return render_template('result.html', filename=filename, results=results)
+@app.route('/uploads/<filename>')
+def uploaded_file(filename):
+    return send_from_directory(UPLOAD_DIR, filename)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
