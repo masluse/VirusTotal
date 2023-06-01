@@ -4,12 +4,19 @@
     <title>Result</title>
 </head>
 <body>
-    <h1>{{ filename }}</h1>
-    {% for hash, result in results.items() %}
-        <p>
-        <strong>Hash: </strong> {{ hash }}<br>
-        <strong>Bösartig: </strong> {% if result.positives > 0 %} Ja {% else %} Nein {% endif %}
-        </p>
-    {% endfor %}
+    <h1>Result</h1>
+    <table>
+        <tr>
+            <th>Hash</th>
+            <th>Malicious</th>
+        </tr>
+        {% for result in results %}
+        <tr>
+            <td>{{ result[0] }}</td>
+            <td>{% if result[1] != 'Not found' %}{{ result[1] }} / {{ result[2] }}{% else %}Not found{% endif %}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <a href="/">Back</a>
 </body>
 </html>
