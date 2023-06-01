@@ -20,7 +20,6 @@ env = Environment(loader=FileSystemLoader('templates'))
 background_task_running = False
 
 def check_hash(hash_value, results):
-    global background_task_running
     params = {'apikey': API_KEY, 'resource': hash_value}
     response = requests.get(BASE_URL, params=params)
     time.sleep(WAIT_TIME)
@@ -29,7 +28,6 @@ def check_hash(hash_value, results):
         results.append((hash_value, result.get('positives', 'Not found'), result.get('total', 'Not found')))
     else:
         results.append((hash_value, 'Not found', 'Not found'))
-    background_task_running = False
 
 def process_hashes(hashes):
     global background_task_running
@@ -50,9 +48,9 @@ def index():
     global background_task_running
     if request.method == 'POST':
         hashes = request.form['hashes'].splitlines()
-        estimated_time = len(hashes) * WAIT_TIME
+        estimated_time = len(hashes) * WAIT_TIME / 60
         threading.Thread(target=process_hashes, args=(hashes,)).start()
-        return f"Your hashes are being processed. Please check back in approximately {estimated_time} seconds."
+        return f"Your hashes are being processed. Please check back in approximately {estimated_time} Minutes."
     files = os.listdir(UPLOAD_DIR)
     return render_template('index.html', files=files, task_running=background_task_running)
 
