@@ -2,7 +2,7 @@ from flask import Flask, request, render_template, send_from_directory
 import requests
 import os
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 import time
 import threading
 from jinja2 import Environment, FileSystemLoader
@@ -17,7 +17,10 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 env = Environment(loader=FileSystemLoader('templates'))
 
+background_task_running = False
+
 def check_hash(hash_value, results):
+    global background_task_running
     params = {'apikey': API_KEY, 'resource': hash_value}
     response = requests.get(BASE_URL, params=params)
     time.sleep(WAIT_TIME)
@@ -26,8 +29,11 @@ def check_hash(hash_value, results):
         results.append((hash_value, result.get('positives', 'Not found'), result.get('total', 'Not found')))
     else:
         results.append((hash_value, 'Not found', 'Not found'))
+    background_task_running = False
 
 def process_hashes(hashes):
+    global background_task_running
+    background_task_running = True
     results = []
     for hash_value in hashes:
         check_hash(hash_value, results)
@@ -37,15 +43,18 @@ def process_hashes(hashes):
         result_template = env.get_template('result.html')
         html = result_template.render(results=results)
         f.write(html)
+    background_task_running = False
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    global background_task_running
     if request.method == 'POST':
         hashes = request.form['hashes'].splitlines()
+        estimated_time = len(hashes) * WAIT_TIME
         threading.Thread(target=process_hashes, args=(hashes,)).start()
-        return "Your hashes are being processed. Please check back later."
+        return f"Your hashes are being processed. Please check back in approximately {estimated_time} seconds."
     files = os.listdir(UPLOAD_DIR)
-    return render_template('index.html', files=files)
+    return render_template('index.html', files=files, task_running=background_task_running)
 
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
