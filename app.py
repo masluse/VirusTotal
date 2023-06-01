@@ -8,7 +8,7 @@ from threading import Lock
 from jinja2 import Environment, FileSystemLoader
 
 app = Flask(__name__)
-API_KEY = 'your_virustotal_public_api_key'
+API_KEY = os.environ.get('VT_API_KEY', 'your_default_virustotal_public_api_key')
 BASE_URL = 'https://www.virustotal.com/vtapi/v2/file/report'
 UPLOAD_DIR = 'uploads'
 WAIT_TIME = 15  # 15 seconds wait time
