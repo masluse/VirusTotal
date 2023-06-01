@@ -19,21 +19,33 @@ def check_hash(hash_value):
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
-        hashes = request.form['hashes'].splitlines()
-        results = []
-        for hash_value in hashes:
-            result = check_hash(hash_value)
-            if result['response_code']:
-                results.append((hash_value, result['positives'], result['total']))
-            else:
-                results.append((hash_value, 'Not found', 'Not found'))
-        timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
-        filename = f'{timestamp}.json'
-        with open(os.path.join(UPLOAD_DIR, filename), 'w') as f:
-            json.dump(results, f)
-        return render_template('result.html', filename=filename, results=results)
-    files = os.listdir(UPLOAD_DIR)
-    return render_template('index.html', files=files)
+        # ...
+        filename_html = f'{timestamp}.html'
+        html_content = render_template_string('''<!DOCTYPE html>
+        <html>
+        <head>
+            <title>Result</title>
+        </head>
+        <body>
+            <h1>Result</h1>
+            <table>
+                <tr>
+                    <th>Hash</th>
+                    <th>Malicious</th>
+                </tr>
+                {% for result in results %}
+                <tr>
+                    <td>{{ result[0] }}</td>
+                    <td>{% if result[1] != 'Not found' %}{{ result[1] }} / {{ result[2] }}{% else %}Not found{% endif %}</td>
+                </tr>
+                {% endfor %}
+            </table>
+            <a href="/">Back</a>
+        </body>
+        </html>''', results=results)
+        with open(os.path.join(UPLOAD_DIR, filename_html), 'w') as f:
+            f.write(html_content)
+        return render_template('result.html', results=results)
 
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
