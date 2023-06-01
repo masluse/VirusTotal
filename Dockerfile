@@ -7,5 +7,7 @@ RUN pip install -r requirements.txt
 
 COPY . .
 
+ENV VT_API_KEY=''
 CMD ["python", "app.py"]
+
 
