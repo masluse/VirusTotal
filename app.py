@@ -1,25 +1,34 @@
-from flask import Flask, request, render_template, send_from_directory
-import requests
 import os
-import json
-from datetime import datetime
+import datetime
+import requests
+from flask import Flask, request, render_template, render_template_string, send_from_directory
 
 app = Flask(__name__)
-API_KEY = 'your_virustotal_public_api_key'
-BASE_URL = 'https://www.virustotal.com/vtapi/v2/file/report'
+API_KEY = 'your-api-key'
 UPLOAD_DIR = 'uploads'
 
-os.makedirs(UPLOAD_DIR, exist_ok=True)
+@app.route('/')
+def index():
+    files = os.listdir(UPLOAD_DIR)
+    return render_template('index.html', files=files)
 
-def check_hash(hash_value):
-    params = {'apikey': API_KEY, 'resource': hash_value}
-    response = requests.get(BASE_URL, params=params)
-    return response.json()
+@app.route('/uploads/<filename>')
+def uploaded_file(filename):
+    return send_from_directory(UPLOAD_DIR, filename)
 
 @app.route('/', methods=['GET', 'POST'])
-def index():
+def check_hashes():
     if request.method == 'POST':
-        # ...
+        hashes = request.form.get('hashes').splitlines()
+        results = []
+        for h in hashes:
+            response = requests.get(f'https://www.virustotal.com/vtapi/v2/file/report?apikey={API_KEY}&resource={h}')
+            json_response = response.json()
+            if json_response['response_code']:
+                results.append([h, json_response['positives'], json_response['total']])
+            else:
+                results.append([h, 'Not found'])
+        timestamp = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
         filename_html = f'{timestamp}.html'
         html_content = render_template_string('''<!DOCTYPE html>
         <html>
@@ -46,10 +55,9 @@ def index():
         with open(os.path.join(UPLOAD_DIR, filename_html), 'w') as f:
             f.write(html_content)
         return render_template('result.html', results=results)
-
-@app.route('/uploads/<filename>')
-def uploaded_file(filename):
-    return send_from_directory(UPLOAD_DIR, filename)
+    return render_template('index.html')
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    if not os.path.exists(UPLOAD_DIR):
+        os.makedirs(UPLOAD_DIR)
+    app.run(debug=True)
