@@ -5,7 +5,12 @@
 </head>
 <body>
     <h1>{{ filename }}</h1>
-    <pre>{{ content }}</pre>
+    {% for hash, result in results.items() %}
+        <p>
+        <strong>Hash: </strong> {{ hash }}<br>
+        <strong>Bösartig: </strong> {% if result.positives > 0 %} Ja {% else %} Nein {% endif %}
+        </p>
+    {% endfor %}
     <a href="/">Back</a>
 </body>
 </html>
