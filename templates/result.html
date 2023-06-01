@@ -1,19 +1,24 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Result</title>
+    <title>Hash Check Result</title>
+    <style>
+        table {width: 100%; border-collapse: collapse; margin-top: 20px;}
+        th, td {border: 1px solid #ccc; padding: 10px; text-align: left;}
+        th {background-color: #f8f8f8;}
+    </style>
 </head>
 <body>
-    <h1>Result</h1>
+    <h1>Hash Check Result</h1>
     <table>
         <tr>
             <th>Hash</th>
             <th>Malicious</th>
         </tr>
-        {% for result in results %}
+        {% for hash_value, positives, total in results %}
         <tr>
-            <td>{{ result[0] }}</td>
-            <td>{% if result[1] != 'Not found' %}{{ result[1] }} / {{ result[2] }}{% else %}Not found{% endif %}</td>
+            <td>{{ hash_value }}</td>
+            <td>{% if positives != 'Not found' %}{{ positives }} / {{ total }}{% else %}Not found{% endif %}</td>
         </tr>
         {% endfor %}
     </table>
