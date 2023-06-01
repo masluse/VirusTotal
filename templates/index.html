@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Virus Total Checker</title>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <title>Hash Checker</title>
 </head>
-<body class="container pt-5">
-    <h1>Virus Total Checker</h1>
-    <form method="POST" action="/check" class="pt-3">
-        <div class="form-group">
-            <label for="hashes">Hashes:</label><br>
-            <textarea id="hashes" name="hashes" class="form-control" rows="10"></textarea>
-        </div>
-        <input type="submit" value="Check" class="btn btn-primary">
+<body>
+    <h1>Hash Checker</h1>
+    <form method="POST" action="/">
+        <textarea name="hashes" placeholder="Enter hashes here, one per line"></textarea>
+        <input type="submit" value="Check">
     </form>
+    <h2>Results:</h2>
+    {% for file in files %}
+    <a href="{{ url_for('results', filename=file) }}">{{ file }}</a><br>
+    {% endfor %}
 </body>
 </html>
