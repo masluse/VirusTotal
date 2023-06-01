@@ -5,6 +5,7 @@ import json
 from datetime import datetime
 import time
 from threading import Lock
+import concurrent.futures
 from jinja2 import Environment, FileSystemLoader
 
 app = Flask(__name__)
@@ -21,6 +22,7 @@ env = Environment(loader=FileSystemLoader('templates'))
 def check_hash(hash_value):
     params = {'apikey': API_KEY, 'resource': hash_value}
     response = requests.get(BASE_URL, params=params)
+    time.sleep(WAIT_TIME)
     return response.json()
 
 @app.route('/', methods=['GET', 'POST'])
@@ -28,22 +30,20 @@ def index():
     if request.method == 'POST':
         with lock:
             hashes = request.form['hashes'].splitlines()
-            wait_time = len(hashes) * WAIT_TIME
             results = []
             for hash_value in hashes:
                 result = check_hash(hash_value)
-                if result['response_code']:
-                    results.append((hash_value, result['positives'], result['total']))
+                if result.get('response_code'):
+                    results.append((hash_value, result.get('positives', 'Not found'), result.get('total', 'Not found')))
                 else:
                     results.append((hash_value, 'Not found', 'Not found'))
-                time.sleep(WAIT_TIME)
             timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
             filename = f'{timestamp}.html'
             with open(os.path.join(UPLOAD_DIR, filename), 'w') as f:
                 result_template = env.get_template('result.html')
                 html = result_template.render(results=results)
                 f.write(html)
-            return render_template('result.html', filename=filename, results=results, wait_time=wait_time)
+            return render_template('result.html', filename=filename, results=results, wait_time=WAIT_TIME)
     files = os.listdir(UPLOAD_DIR)
     return render_template('index.html', files=files)
 
