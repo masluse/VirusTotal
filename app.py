@@ -1,45 +1,37 @@
-from flask import Flask, request, render_template, redirect, url_for
-import time
+from flask import Flask, render_template, request, redirect
 import requests
-import os
+from datetime import datetime
 
 app = Flask(__name__)
 
-API_KEY = "Your_Virus_Total_API_Key"
-
-def check_virus_total(hash_value):
- url = f"https://www.virustotal.com/api/v3/files/{hash_value}"
- headers = {
-   "x-apikey": API_KEY
- }
- response = requests.get(url, headers=headers)
- if response.status_code == 200:
-     return response.json()
- else:
-     return f"Error for hash {hash_value}, HTTP {response.status_code}"
-
 @app.route('/', methods=['GET', 'POST'])
 def home():
- if request.method == 'POST':
-     hashes = request.form.get('hashes').split('\n')
-     for hash_value in hashes:
-         hash_value = hash_value.strip()  # remove newlines and any trailing spaces
-         result = check_virus_total(hash_value)
-         with open(f'results/{hash_value}.txt', 'w') as file:
-             file.write(str(result))
-         time.sleep(15)  # Wait for 15 seconds to not exceed the rate limit
-     return redirect(url_for('home'))
- else:
-     files = os.listdir('results/')
-     return render_template('index.html', files=files)
+    if request.method == 'POST':
+        hash_list = request.form['hashes'].split('\n')
+        return redirect(f'/check?hashes={",".join(hash_list)}')
+    return render_template('home.html')
 
-@app.route('/results/<filename>')
-def results(filename):
- with open(f'results/{filename}') as file:
-     content = file.read()
- return render_template('result.html', filename=filename, content=content)
+@app.route('/check')
+def hash_check():
+    hash_list = request.args.get('hashes').split(',')
+    results = {}
 
-if __name__ == "__main__":
- if not os.path.isdir('results'):
-     os.mkdir('results')
- app.run(host='0.0.0.0')
+    for hash in hash_list:
+        response = requests.get(f'https://www.virustotal.com/vtapi/v2/file/report?apikey=<IHR API SCHLÜSSEL>&resource={hash}')
+        results[hash] = response.json()
+
+    date_string = datetime.now().strftime("%Y_%m_%d-%I_%M_%S_%p")
+    filename = f'results_{date_string}.txt'
+
+    with open(filename, 'w') as file:
+        for hash, result in results.items():
+            file.write(f'Hash: {hash}\n')
+            if result['positives'] > 0:
+                file.write('Bösartig: Ja\n\n')
+            else:
+                file.write('Bösartig: Nein\n\n')
+
+    return render_template('result.html', filename=filename, results=results)
+
+if __name__ == '__main__':
+    app.run(debug=True)
