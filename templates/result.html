@@ -28,10 +28,9 @@
     <table>
         <tr>
             <th>Hash</th>
-            <th>Creation Time</th>
             <th>Malicious</th>
         </tr>
-        {% for hash_value, creation_time, positives, total in results %}
+        {% for hash_value, positives, total in results %}
         <tr>
             <td>
                 {% if positives != 'Not found' %}
@@ -40,7 +39,6 @@
                 {{ hash_value }}
                 {% endif %}
             </td>
-            <td>{{ creation_time }}</td>
             <td>{% if positives != 'Not found' %}{{ positives }} / {{ total }}{% else %}Not found{% endif %}</td>
         </tr>
         {% endfor %}

@@ -1,48 +1,33 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Hash Check Result</title>
+    <title>VT API Hash Checker</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
             text-align: center;
+            padding: 20px;
+            font-family: Arial, sans-serif;
         }
-        table {
-            width: 80%;
-            border-collapse: collapse; 
-            margin: 20px auto;
-        }
-        th, td {
-            border: 1px solid #ccc;
-            padding: 10px;
-            text-align: left;
-        }
-        th {
-            background-color: #f8f8f8;
+        #hashForm {
+            margin-bottom: 30px;
         }
     </style>
 </head>
 <body>
-    <h1>Hash Check Result</h1>
-    <p>Your result is ready.</p>
-    <table>
-        <tr>
-            <th>Hash</th>
-            <th>Malicious</th>
-        </tr>
-        {% for hash_value, positives, total in results %}
-        <tr>
-            <td>
-                {% if positives != 'Not found' %}
-                <a href="https://yourwebsite.com/{{hash_value}}" target="_blank">{{ hash_value }}</a>
-                {% else %}
-                {{ hash_value }}
-                {% endif %}
-            </td>
-            <td>{% if positives != 'Not found' %}{{ positives }} / {{ total }}{% else %}Not found{% endif %}</td>
-        </tr>
-        {% endfor %}
-    </table>
-    <a href="/">Back</a>
+    <h1>VirusTotal API Hash Checker</h1>
+    <form id="hashForm" action="/" method="POST">
+        <textarea name="hashes" rows="10" cols="70" required></textarea><br/>
+        <input type="submit" value="Submit">
+    </form>
+    <div id="waitTime"></div>
+    {% if task_running %}
+        <p>A background task is currently running. Please wait...</p>
+    {% else %}
+        <p>No background task running.</p>
+    {% endif %}
+    <h2>Past Results</h2>
+    {% for file in files|reverse %}
+        <a href="{{ url_for('uploaded_file', filename=file) }}">{{ file[:8] }} at {{ file[8:10] }}:{{ file[10:12] }}:{{ file[12:14] }}</a><br/>
+    {% endfor %}
 </body>
 </html>
