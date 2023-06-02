@@ -25,12 +25,9 @@ def check_hash(hash_value, results):
     time.sleep(WAIT_TIME)
     result = response.json()
     if result.get('response_code'):
-        results.append((hash_value, result.get('scan_date', 'Not found'), result.get('positives', 'Not found'), result.get('total', 'Not found')))
+        results.append((hash_value, result.get('positives', 'Not found'), result.get('total', 'Not found')))
     else:
-        results.append((hash_value, 'Not found', 'Not found', 'Not found'))
-
-
-
+        results.append((hash_value, 'Not found', 'Not found'))
 
 def process_hashes(hashes):
     global background_task_running
