@@ -8,10 +8,11 @@ import threading
 from jinja2 import Environment, FileSystemLoader
 
 app = Flask(__name__)
-API_KEY = os.environ.get('VT_API_KEY', 'your_default_virustotal_public_api_key')
+API_KEYS = os.environ.get('VT_API_KEY', 'your_default_virustotal_public_api_key').split(',')
+key_index = 0
 BASE_URL = 'https://www.virustotal.com/vtapi/v2/file/report'
 UPLOAD_DIR = 'uploads'
-WAIT_TIME = 15  # 15 seconds wait time
+WAIT_TIME = 15  # 15 seconds total wait time, will be divided by the number of API keys
 
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
@@ -20,9 +21,11 @@ env = Environment(loader=FileSystemLoader('templates'))
 background_task_running = False
 
 def check_hash(hash_value, results):
-    params = {'apikey': API_KEY, 'resource': hash_value}
+    global key_index
+    params = {'apikey': API_KEYS[key_index], 'resource': hash_value}
     response = requests.get(BASE_URL, params=params)
-    time.sleep(WAIT_TIME)
+    key_index = (key_index + 1) % len(API_KEYS)  # move to the next key
+    time.sleep(WAIT_TIME / len(API_KEYS))  # divide wait time by number of API keys
     result = response.json()
     if result.get('response_code'):
         results.append((hash_value, result.get('positives', 'Not found'), result.get('total', 'Not found')))
@@ -48,7 +51,7 @@ def index():
     global background_task_running
     if request.method == 'POST':
         hashes = request.form['hashes'].splitlines()
-        estimated_time = len(hashes) * WAIT_TIME / 60
+        estimated_time = len(hashes) * WAIT_TIME / 60 / len(API_KEYS)  # adjust estimated time based on number of API keys
         threading.Thread(target=process_hashes, args=(hashes,)).start()
         return f"Your hashes are being processed. Please check back in approximately {estimated_time} Minutes."
     files = os.listdir(UPLOAD_DIR)
