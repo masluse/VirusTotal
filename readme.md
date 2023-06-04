@@ -21,8 +21,8 @@ docker run -p 5000:5000 -e VT_API_KEY='your_virustotal_public_api_key1,your_viru
 
 Docker Compose:
 
-```
-version: "3.9"
+``` Dockerfile
+version: "3.8"
 services:
   hash-checker:
     image: masluse/hash-checker:latest
