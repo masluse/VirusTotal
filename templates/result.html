@@ -6,6 +6,8 @@
         body {
             font-family: Arial, sans-serif;
             text-align: center;
+            background-color: #333;
+            color: #fff;
         }
         table {
             width: 80%;
@@ -18,7 +20,10 @@
             text-align: left;
         }
         th {
-            background-color: #f8f8f8;
+            background-color: #555;
+        }
+        a {
+            color: #00f;
         }
     </style>
 </head>
@@ -32,7 +37,13 @@
         </tr>
         {% for hash_value, positives, total in results %}
         <tr>
-            <td>{{ hash_value }}</td>
+            <td>
+                {% if positives != 'Not found' %}
+                <a href="https://www.virustotal.com/gui/file/{{hash_value}}" target="_blank">{{ hash_value }}</a>
+                {% else %}
+                {{ hash_value }}
+                {% endif %}
+            </td>
             <td>{% if positives != 'Not found' %}{{ positives }} / {{ total }}{% else %}Not found{% endif %}</td>
         </tr>
         {% endfor %}
