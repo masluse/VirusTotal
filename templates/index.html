@@ -30,9 +30,9 @@
     </form>
     <div id="waitTime"></div>
     {% if task_running %}
-        <p>A background task is currently running. Please wait...</p>
+        <p>A API task is currently running. Please wait...</p>
     {% else %}
-        <p>No background task running.</p>
+        <p>No API task running.</p>
     {% endif %}
     <h2>Past Results</h2>
     {% for file in files|reverse %}
