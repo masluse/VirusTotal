@@ -36,7 +36,7 @@
     {% endif %}
     <h2>Past Results</h2>
     {% for file in files|reverse %}
-        <a href="{{ url_for('uploaded_file', filename=file) }}">{{ file[:8] }} at {{ file[8:10] }}:{{ file[10:12] }}:{{ file[12:14] }}</a><br/>
+        <a href="{{ url_for('uploaded_file', filename=file) }}" style="color: #959ee7">{{ file[:8] }} at {{ file[8:10] }}:{{ file[10:12] }}:{{ file[12:14] }}</a><br/>
     {% endfor %}
 </body>
 </html>
