@@ -19,9 +19,9 @@ Docker Befehl:
 docker run -p 5000:5000 -e VT_API_KEY='your_virustotal_public_api_key1,your_virustotal_public_api_key2' masluse/hash-checker
 ```
 
-Docker Compose:
+## Docker Compose:
 
-``` Dockerfile
+``` yaml
 version: "3.8"
 services:
   hash-checker:
@@ -30,7 +30,9 @@ services:
     ports:
       - 5000:5000
     environment:
-      - VT_API_KEY='your_virustotal_public_api_key1,your_virustotal_public_api_key2'
+      - VT_API_KEY=API_KEY1,API_KEY2
+    volumes:
+      - /host/directory/to/uploads:/app/uploads
     restart: always
 ```
 
