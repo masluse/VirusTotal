@@ -46,13 +46,14 @@ def process_hashes(hashes):
     results = []
     for hash_value in hashes:
         check_hash(hash_value, results)
-    timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+    timestamp = datetime.now().strftime('%d.%m.%Y%H%M%S') # Ändert das Format des Datums
     filename = f'{timestamp}.html'
     with open(os.path.join(UPLOAD_DIR, filename), 'w') as f:
         result_template = env.get_template('result.html')
         html = result_template.render(results=results)
         f.write(html)
     background_task_running = False
+
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -62,8 +63,9 @@ def index():
         estimated_time = len(hashes) * WAIT_TIME / 60 / len(API_KEYS)  # adjust estimated time based on number of API keys
         threading.Thread(target=process_hashes, args=(hashes,)).start()
         return f"Your hashes are being processed. Please check back in approximately {estimated_time} Minutes."
-    files = os.listdir(UPLOAD_DIR)
+    files = sorted(os.listdir(UPLOAD_DIR), reverse=True)  # Sortiert die Dateien absteigend
     return render_template('index.html', files=files, task_running=background_task_running)
+
 
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
