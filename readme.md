@@ -32,6 +32,7 @@ services:
     environment:
       # At least one API key must be configured.
       - VT_API_KEY=API_KEY1,API_KEY2
+      - TZ=Europe/Zurich
     volumes:
       # The following volume allows you to map the results so that they are not deleted.
       - /host/directory/to/uploads:/app/uploads
