@@ -21,12 +21,13 @@
             color: #00f;
         }
     </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 </head>
 <body>
     <h1>VirusTotal API Hash Checker</h1>
     <form id="hashForm" action="/" method="POST">
-        <textarea name="hashes" rows="10" cols="70" required></textarea><br/>
-        <input type="submit" value="Submit">
+        <textarea id="hashInput" name="hashes" rows="10" cols="70" required></textarea><br/>
+        <input id="submitButton" type="submit" value="Submit">
     </form>
     <div id="waitTime"></div>
     {% if task_running %}
@@ -38,5 +39,34 @@
     {% for file in files %}
         <a href="{{ url_for('uploaded_file', filename=file) }}" style="color: #959ee7">{{ file[:10] }} at {{ file[10:12] }}:{{ file[12:14] }}:{{ file[14:16] }}</a><br/>
     {% endfor %}
+    <script>
+    $(document).ready(function() {
+        checkTaskStatus();
+        $("#hashForm").submit(function(event) {
+            event.preventDefault();
+            $.ajax({
+                type: 'POST',
+                url: '/',
+                data: $(this).serialize(),
+                dataType: 'json',
+                success: function(data) {
+                    alert("Your hashes are being processed. Please check back in approximately " + data.estimated_time + " Minutes.");
+                    $("#hashInput").prop('disabled', true);
+                    $("#submitButton").prop('disabled', true);
+                }
+            });
+        });
+    });
+
+    function checkTaskStatus() {
+        $.getJSON("/check_task_status", function(data) {
+            if (!data.task_running) {
+                $("#hashInput").prop('disabled', false);
+                $("#submitButton").prop('disabled', false);
+            }
+            setTimeout(checkTaskStatus, 5000); 
+        });
+    }
+    </script>
 </body>
 </html>
