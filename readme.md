@@ -28,11 +28,16 @@ services:
     image: masluse/hash-checker:latest
     container_name: hash-checker
     ports:
-      - 5000:5000
+      - 443:5000
     environment:
-      - VT_API_KEY=API_KEY1,API_KEY2
+	#  At least one API key must be configured.
+       - VT_API_KEY=API_KEY1,API_KEY2
     volumes:
-      - /host/directory/to/uploads:/app/uploads
+	#  The following volume allows you to map the results so that they are not deleted.
+       - /host/directory/to/uploads:/app/uploads
+	#  If the following Volumes are not configured, the image will generate a certificate.
+	#  - /host/directory/to/cert.pem:/app/cert.pem
+	#  - /host/directory/to/key.pem:/app/key.pem
     restart: always
 ```
 
