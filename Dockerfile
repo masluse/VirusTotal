@@ -1,13 +1,15 @@
-FROM python:3.9-slim-buster
+FROM python:3.9-slim
 
 WORKDIR /app
 
-COPY requirements.txt requirements.txt
-RUN pip install -r requirements.txt
+COPY app.py /app
+COPY templates /app/templates
 
-COPY . .
+# Install openssl to generate SSL certificates
+RUN apt-get update && \
+    apt-get install -y openssl && \
+    rm -rf /var/lib/apt/lists/*
 
-ENV VT_API_KEY=''
+RUN pip install flask requests
+
 CMD ["python", "app.py"]
-
-
