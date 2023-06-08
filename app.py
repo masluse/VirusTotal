@@ -33,9 +33,23 @@ def check_hash(hash_value, results):
     time.sleep(WAIT_TIME / len(API_KEYS))
     result = response.json()
     if result.get('response_code'):
-        results.append((hash_value, result.get('positives', 'Not found'), result.get('total', 'Not found')))
+        name = result.get('scan_id').split('-')[1] if result.get('scan_id') else 'Not found'  # Extract file name from scan_id
+        threat_label = result.get('popular_threat_classification', {}).get('suggested_threat_label', 'Not found')
+        size = convert_size(result.get('size', 0))  # use convert_size function here
+        results.append((hash_value, result.get('positives', 'Not found'), result.get('total', 'Not found'), name, threat_label, size))
     else:
-        results.append((hash_value, 'Not found', 'Not found'))
+        results.append((hash_value, 'Not found', 'Not found', 'Not found', 'Not found', '0B'))  # default size to 0 bytes
+
+
+def convert_size(size_bytes):
+    if size_bytes == 0:
+        return "0B"
+    size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
+    i = int(math.floor(math.log(size_bytes, 1024)))
+    p = math.pow(1024, i)
+    s = round(size_bytes / p, 2)
+    return "%s %s" % (s, size_name[i])
+
 
 def process_hashes(hashes):
     global background_task_running
