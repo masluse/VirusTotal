@@ -50,4 +50,4 @@ Geben Sie die Hashes, die Sie überprüfen möchten, in das Textfeld ein (einen 
 
 Die Standard-Wartezeit beträgt 15 Sekunden pro Anfrage, wird jedoch durch die Anzahl der bereitgestellten API-Schlüssel geteilt.
 
-![image](https://github.com/masluse/VirusTotal/assets/122784119/577f0ce6-e7d2-44e0-b144-080742390877)
+![image](https://github.com/masluse/VirusTotal/assets/122784119/aeda00d8-a078-483b-b160-a3715a9417d1)
