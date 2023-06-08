@@ -49,3 +49,5 @@ Danach können Sie auf den Service zugreifen, indem Sie Ihren Webbrowser auf htt
 Geben Sie die Hashes, die Sie überprüfen möchten, in das Textfeld ein (einen Hash pro Zeile) und klicken Sie auf "Submit". Der Service wird dann die Hashes überprüfen und einen Bericht generieren, den Sie nach Abschluss der Verarbeitung herunterladen können.
 
 Die Standard-Wartezeit beträgt 15 Sekunden pro Anfrage, wird jedoch durch die Anzahl der bereitgestellten API-Schlüssel geteilt.
+
+![image](https://github.com/masluse/VirusTotal/assets/122784119/577f0ce6-e7d2-44e0-b144-080742390877)
