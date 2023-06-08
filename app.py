@@ -8,11 +8,12 @@ from jinja2 import Environment, FileSystemLoader
 from werkzeug.serving import run_simple
 import subprocess
 import os.path
+import math
 
 app = Flask(__name__)
 API_KEYS = os.environ.get('VT_API_KEY', 'your_default_virustotal_public_api_key').split(',')
 key_index = 0
-BASE_URL = 'https://www.virustotal.com/vtapi/v2/file/report'
+BASE_URL = 'https://www.virustotal.com/api/v3/files'
 UPLOAD_DIR = 'uploads'
 WAIT_TIME = 15  # 15 seconds total wait time, will be divided by the number of API keys
 
@@ -27,15 +28,36 @@ if not os.path.isfile('/app/cert.pem') or not os.path.isfile('/app/key.pem'):
 
 def check_hash(hash_value, results):
     global key_index
-    params = {'apikey': API_KEYS[key_index], 'resource': hash_value}
-    response = requests.get(BASE_URL, params=params)
+    headers = {'x-apikey': API_KEYS[key_index]}
+    url = f"{BASE_URL}/{hash_value}"
+    response = requests.get(url, headers=headers)
     key_index = (key_index + 1) % len(API_KEYS)
     time.sleep(WAIT_TIME / len(API_KEYS))
     result = response.json()
-    if result.get('response_code'):
-        results.append((hash_value, result.get('positives', 'Not found'), result.get('total', 'Not found')))
+    data = result.get('data', {}).get('attributes', {})
+    if data:
+        size = convert_size(data.get('size', 0))
+        threat_label = data.get('popular_threat_classification', {}).get('suggested_threat_label', 'Not found')
+        filename = data.get('names', ['Not found'])[0]  # Get the first name from the list
+        analysis_results = data.get('last_analysis_results', {})
+        malicious_count = sum(1 for engine in analysis_results.values() if engine.get('category') == 'malicious')
+        harmless_count = sum(1 for engine in analysis_results.values() if engine.get('category') == 'undetected')
+        results.append((hash_value, malicious_count, harmless_count, filename, threat_label, size))
     else:
-        results.append((hash_value, 'Not found', 'Not found'))
+        results.append((hash_value, 'Not found', 'Not found', 'Not found', 'Not found', '0B'))  # default size to 0 bytes
+
+
+
+
+def convert_size(size_bytes):
+    if size_bytes == 0:
+        return "0B"
+    size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
+    i = int(math.floor(math.log(size_bytes, 1024)))
+    p = math.pow(1024, i)
+    s = round(size_bytes / p, 2)
+    return "%s %s" % (s, size_name[i])
+
 
 def process_hashes(hashes):
     global background_task_running

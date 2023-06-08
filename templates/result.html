@@ -34,8 +34,11 @@
         <tr>
             <th>Hash</th>
             <th>Malicious</th>
+            <th>File Name</th>
+            <th>Threat Label</th>
+            <th>Size (bytes)</th>
         </tr>
-        {% for hash_value, positives, total in results %}
+        {% for hash_value, positives, total, name, threat_label, size in results %}
         <tr>
             <td>
                 {% if positives != 'Not found' %}
@@ -45,6 +48,9 @@
                 {% endif %}
             </td>
             <td>{% if positives != 'Not found' %}{{ positives }} / {{ total }}{% else %}Not found{% endif %}</td>
+            <td>{{ name }}</td>
+            <td>{{ threat_label }}</td>
+            <td>{{ size }}</td>
         </tr>
         {% endfor %}
     </table>
