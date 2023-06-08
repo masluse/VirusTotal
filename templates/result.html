@@ -50,10 +50,10 @@
                 {{ hash_value }}
                 {% endif %}
             </td>
-            <td>{% if positives != 'Not found' %}<span class="found">{{ positives }} / {{ total }}</span>{% else %}Not found{% endif %}</td>
-            <td>{% if positives != 'Not found' %}<span class="found">{{ name }}</span>{% else %}{{ name }}{% endif %}</td>
-            <td>{% if positives != 'Not found' %}<span class="found">{{ threat_label }}</span>{% else %}{{ threat_label }}{% endif %}</td>
-            <td>{% if positives != 'Not found' %}<span class="found">{{ size }}</span>{% else %}{{ size }}{% endif %}</td>
+            <td>{% if positives != 'Not found' %}<span class="found">{{ positives }} / {{ total }}</span>{% else %}{% endif %}</td>
+            <td>{% if positives != 'Not found' %}<span class="found">{{ name }}</span>{% else %}{% endif %}</td>
+            <td>{% if positives != 'Not found' %}<span class="found">{{ threat_label }}</span>{% else %}{% endif %}</td>
+            <td>{% if positives != 'Not found' %}<span class="found">{{ size }}</span>{% else %}{% endif %}</td>
         </tr>
         {% endfor %}
     </table>
