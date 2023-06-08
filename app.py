@@ -8,8 +8,6 @@ from jinja2 import Environment, FileSystemLoader
 from werkzeug.serving import run_simple
 import subprocess
 import os.path
-import math
-from concurrent.futures import ThreadPoolExecutor
 
 app = Flask(__name__)
 API_KEYS = os.environ.get('VT_API_KEY', 'your_default_virustotal_public_api_key').split(',')
@@ -27,7 +25,7 @@ background_task_running = False
 if not os.path.isfile('/app/cert.pem') or not os.path.isfile('/app/key.pem'):
     subprocess.call(['openssl', 'req', '-x509', '-newkey', 'rsa:4096', '-nodes', '-out', '/app/cert.pem', '-keyout', '/app/key.pem', '-days', '365', '-subj', '/CN=localhost'])
 
-def check_hash(hash_value):
+def check_hash(hash_value, results):
     global key_index
     params = {'apikey': API_KEYS[key_index], 'resource': hash_value}
     response = requests.get(BASE_URL, params=params)
@@ -35,27 +33,16 @@ def check_hash(hash_value):
     time.sleep(WAIT_TIME / len(API_KEYS))
     result = response.json()
     if result.get('response_code'):
-        name = result.get('scan_id').split('-')[1] if result.get('scan_id') else 'Not found'  # Extract file name from scan_id
-        threat_label = result.get('popular_threat_classification', {}).get('suggested_threat_label', 'Not found')
-        size = convert_size(result.get('size', 0))  # use convert_size function here
-        return (hash_value, result.get('positives', 'Not found'), result.get('total', 'Not found'), name, threat_label, size)
+        results.append((hash_value, result.get('positives', 'Not found'), result.get('total', 'Not found')))
     else:
-        return (hash_value, 'Not found', 'Not found', 'Not found', 'Not found', '0B')  # default size to 0 bytes
-
-def convert_size(size_bytes):
-    if size_bytes == 0:
-        return "0B"
-    size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
-    i = int(math.floor(math.log(size_bytes, 1024)))
-    p = math.pow(1024, i)
-    s = round(size_bytes / p, 2)
-    return "%s %s" % (s, size_name[i])
+        results.append((hash_value, 'Not found', 'Not found'))
 
 def process_hashes(hashes):
     global background_task_running
     background_task_running = True
-    with ThreadPoolExecutor(max_workers=len(API_KEYS)) as executor:
-        results = list(executor.map(check_hash, hashes))
+    results = []
+    for hash_value in hashes:
+        check_hash(hash_value, results)
     timestamp = datetime.now().strftime('%d.%m.%Y%H%M%S')
     filename = f'{timestamp}.html'
     with open(os.path.join(UPLOAD_DIR, filename), 'w') as f:
@@ -69,7 +56,7 @@ def index():
     global background_task_running
     if request.method == 'POST' and not background_task_running:
         hashes = request.form['hashes'].splitlines()
-        estimated_time = len(hashes) * WAIT_TIME / 60
+        estimated_time = len(hashes) * WAIT_TIME / 60 / len(API_KEYS)
         threading.Thread(target=process_hashes, args=(hashes,)).start()
         return json.dumps({'success':True, 'estimated_time': estimated_time}), 200, {'ContentType':'application/json'}
     files = sorted(os.listdir(UPLOAD_DIR), reverse=True)
