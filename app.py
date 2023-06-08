@@ -38,7 +38,7 @@ def check_hash(hash_value, results):
     if data:
         size = convert_size(data.get('size', 0))
         threat_label = data.get('popular_threat_classification', {}).get('suggested_threat_label', 'Not found')
-        filename = data.get('names', ['Not found'])[0]  # Get the first name from the list
+        filename = data.get('names', ['Not found'])[0] if data.get('names') else 'Not found'
         analysis_results = data.get('last_analysis_results', {})
         malicious_count = sum(1 for engine in analysis_results.values() if engine.get('category') == 'malicious')
         harmless_count = sum(1 for engine in analysis_results.values())
