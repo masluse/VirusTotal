@@ -8,6 +8,7 @@ from jinja2 import Environment, FileSystemLoader
 from werkzeug.serving import run_simple
 import subprocess
 import os.path
+import math
 
 app = Flask(__name__)
 API_KEYS = os.environ.get('VT_API_KEY', 'your_default_virustotal_public_api_key').split(',')
@@ -40,7 +41,6 @@ def check_hash(hash_value, results):
     else:
         results.append((hash_value, 'Not found', 'Not found', 'Not found', 'Not found', '0B'))  # default size to 0 bytes
 
-
 def convert_size(size_bytes):
     if size_bytes == 0:
         return "0B"
@@ -49,7 +49,6 @@ def convert_size(size_bytes):
     p = math.pow(1024, i)
     s = round(size_bytes / p, 2)
     return "%s %s" % (s, size_name[i])
-
 
 def process_hashes(hashes):
     global background_task_running
