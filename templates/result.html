@@ -33,6 +33,7 @@
 <body>
     <h1>Hash Check Result</h1>
     <p>Your result is ready.</p>
+    <button id="download">Download CSV</button>
     <table>
         <tr>
             <th>Hash</th>
@@ -58,5 +59,29 @@
         {% endfor %}
     </table>
     <a href="/" style="color: #959ee7">Back</a>
+
+    <script>
+    document.getElementById("download").addEventListener("click", function(){
+      var csv = [];
+      var rows = document.querySelectorAll("table tr");
+
+      for (var i = 0; i < rows.length; i++) {
+        var row = [], cols = rows[i].querySelectorAll("td, th");
+        for (var j = 0; j < cols.length; j++) 
+            row.push(cols[j].innerText);
+        csv.push(row.join(","));        
+      }
+
+      // Erstellen Sie einen Link zum Download des CSV-Dokuments
+      var csvFile = new Blob([csv.join("\n")], {type: "text/csv"});
+      var downloadLink = document.createElement("a");
+      downloadLink.download = 'table.csv';
+      downloadLink.href = window.URL.createObjectURL(csvFile);
+      downloadLink.style.display = "none";
+      
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+    });
+    </script>
 </body>
 </html>
