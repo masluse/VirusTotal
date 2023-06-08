@@ -25,6 +25,9 @@
         a {
             color: #00f;
         }
+        .found {
+            color: #959ee7;
+        }
     </style>
 </head>
 <body>
@@ -42,13 +45,13 @@
         <tr>
             <td>
                 {% if positives != 'Not found' %}
-                <a href="https://www.virustotal.com/gui/file/{{hash_value}}" target="_blank" style="color: #959ee7">{{ hash_value }}</a>
+                <a href="https://www.virustotal.com/gui/file/{{hash_value}}" target="_blank" class="found">{{ hash_value }}</a>
                 {% else %}
                 {{ hash_value }}
                 {% endif %}
             </td>
             <td>{% if positives != 'Not found' %}{{ positives }} / {{ total }}{% else %}Not found{% endif %}</td>
-            <td>{{ name }}</td>
+            <td>{% if positives != 'Not found' %}{{ name }}{% else %}<span class="found">{{ name }}</span>{% endif %}</td>
             <td>{{ threat_label }}</td>
             <td>{{ size }}</td>
         </tr>
