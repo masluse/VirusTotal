@@ -67,15 +67,29 @@
 
       for (var i = 0; i < rows.length; i++) {
         var row = [], cols = rows[i].querySelectorAll("td, th");
-        for (var j = 0; j < cols.length; j++) 
-            row.push(cols[j].innerText);
+        for (var j = 0; j < cols.length; j++) {
+            if(i === 0 && j === cols.length - 1){
+                row.push("Link to VirusTotal");
+            }
+            else if(j === 0 && i > 0) {
+                var hash = cols[j].innerText;
+                var link = "https://www.virustotal.com/gui/file/" + hash;
+                row.push(hash);
+                row.push(link);
+            } else {
+                row.push(cols[j].innerText);
+            }
+        }
         csv.push(row.join(","));        
       }
 
-      // Erstellen Sie einen Link zum Download des CSV-Dokuments
+      // Zeitstempel aus dem aktuellen Pfad extrahieren
+      var path = window.location.pathname;
+      var filename = path.split('/').pop().split('.').shift();
+      
       var csvFile = new Blob([csv.join("\n")], {type: "text/csv"});
       var downloadLink = document.createElement("a");
-      downloadLink.download = 'table.csv';
+      downloadLink.download = filename + '.csv';
       downloadLink.href = window.URL.createObjectURL(csvFile);
       downloadLink.style.display = "none";
       
