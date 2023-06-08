@@ -88,7 +88,7 @@
       
       var csvFile = new Blob([csv.join("\n")], {type: "text/csv"});
       var downloadLink = document.createElement("a");
-      downloadLink.download = 'ioc.csv';
+      downloadLink.download = 'hash.csv';
       downloadLink.href = window.URL.createObjectURL(csvFile);
       downloadLink.style.display = "none";
       
