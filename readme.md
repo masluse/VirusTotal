@@ -50,4 +50,6 @@ Geben Sie die Hashes, die Sie überprüfen möchten, in das Textfeld ein (einen 
 
 Die Standard-Wartezeit beträgt 15 Sekunden pro Anfrage, wird jedoch durch die Anzahl der bereitgestellten API-Schlüssel geteilt.
 
+Docker Hub: https://hub.docker.com/r/masluse/hash-checker
+
 ![image](https://github.com/masluse/VirusTotal/assets/122784119/aeda00d8-a078-483b-b160-a3715a9417d1)
